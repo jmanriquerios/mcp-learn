@@ -2,7 +2,7 @@ import { fetchCatalog } from './catalogClient.js';
 
 // Solo se permitirán estos parámetros
 function sanitizeQueryParams(params) {
-  const allowed = ["locale", "type", "level", "subject", "role", "product"];
+  const allowed = ["locale", "type", "level", "role", "product"];
   const clean = {};
   for (const key of allowed) {
     if (params[key]) {
