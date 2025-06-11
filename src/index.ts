@@ -1,68 +1,66 @@
 // src/index.ts
-
 import express, { Request, Response } from "express";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
-import { z } from "zod";
 
-// 1) Definimos el esquema Zod para los parámetros
-const catalogParams = z.object({
-  locale:   z.string().optional(),
-  type:     z.string().optional(),
-  level:    z.string().optional(),
-  role:     z.string().optional(),
-  product:  z.string().optional()
-});
-export type CatalogParams = z.infer<typeof catalogParams>;
-
-// 2) Creamos el servidor y ya incluimos description + parameters
 const server = new McpServer({
-  name:        "learnCatalog",
+  name: "learnCatalog",
   description: "MCP server para Microsoft Learn Catalog API",
-  version:     "1.0.0",
+  version: "1.0.0",
   tools: [
     {
-      name:        "get-catalog",
+      name: "get-catalog",
       description: "Obtener elementos del catálogo de Microsoft Learn",
-      parameters:  catalogParams,
+      parameters: {},               // igual que en el ejemplo de Jokes MCP
     },
   ],
 });
 
-// 3) Registramos la herramienta con 2 argumentos: name + handler
-server.tool("get-catalog", async (params: CatalogParams) => {
-  const qs = new URLSearchParams();
-  if (params.locale)  qs.append("locale",  params.locale);
-  if (params.type)    qs.append("type",    params.type);
-  if (params.level)   qs.append("level",   params.level);
-  if (params.role)    qs.append("role",    params.role);
-  if (params.product) qs.append("product", params.product);
+// IMPORTANTE: 3 args, y handler recibe todo el objeto `extra`
+server.tool(
+  "get-catalog",
+  "Obtener elementos del catálogo de Microsoft Learn",
+  async (extra: any) => {
+    // extra.parameters trae tus cinco parámetros
+    const { locale, type, level, role, product } = extra.parameters as {
+      locale?: string;
+      type?: string;
+      level?: string;
+      role?: string;
+      product?: string;
+    };
 
-  const url = `https://learn.microsoft.com/api/catalog?${qs.toString()}`;
-  const res = await fetch(url);
-  const data = await res.json();
+    const qs = new URLSearchParams();
+    if (locale)  qs.append("locale",  locale);
+    if (type)    qs.append("type",    type);
+    if (level)   qs.append("level",   level);
+    if (role)    qs.append("role",    role);
+    if (product) qs.append("product", product);
 
-  return {
-    content: [{ type: "json", data }],
-  };
-});
+    const url = `https://learn.microsoft.com/api/catalog?${qs.toString()}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    return {
+      content: [
+        { type: "json", data }
+      ],
+    };
+  }
+);
 
 const app = express();
 const transports: Record<string, SSEServerTransport> = {};
 
-// SSE endpoint
 app.get("/sse", async (req: Request, res: Response) => {
-  const host    = req.get("host")!;
+  const host = req.get("host")!;
   const fullUri = `https://${host}/catalog`;
   const transport = new SSEServerTransport(fullUri, res);
-
   transports[transport.sessionId] = transport;
   res.on("close", () => delete transports[transport.sessionId]);
-
   await server.connect(transport);
 });
 
-// Callback POST
 app.post("/catalog", express.json(), async (req: Request, res: Response) => {
   const sessionId = req.query.sessionId as string;
   const transport = transports[sessionId];
@@ -70,7 +68,6 @@ app.post("/catalog", express.json(), async (req: Request, res: Response) => {
   await transport.handlePostMessage(req, res);
 });
 
-// Health check
 app.get("/", (_req, res) => {
   res.send("MCP Learn Catalog server running!");
 });
