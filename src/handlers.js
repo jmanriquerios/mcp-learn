@@ -3,7 +3,7 @@ import { fetchCatalog } from './catalogClient.js';
 // Filtrar solo los parámetros válidos según Learn Catalog API
 function sanitizeQueryParams(params) {
   const allowed = [
-    "locale", "type", "level", "subject", "popularity", "last_modified", "search"
+    "locale", "type", "level", "subject", "search"
   ];
   const clean = {};
   for (const key of allowed) {

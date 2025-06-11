@@ -1,13 +1,17 @@
 import express from 'express';
-import { searchCatalog, streamCatalog, sseCatalog } from './handlers.js';
+import cors from 'cors';
+import { sseCatalog } from './handlers.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.get('/searchCatalog', searchCatalog);
-app.get('/streamCatalog', streamCatalog);
+// Middleware básico
+app.use(cors());
+
+// Ruta única MCP SSE
 app.get('/sseCatalog', sseCatalog);
 
+// Servidor
 app.listen(port, () => {
-  console.log(`MCP server listening on port ${port}`);
+  console.log(`✅ MCP Learn Catalog listening on port ${port}`);
 });
