@@ -5,7 +5,7 @@
     "description": "Stream Microsoft Learn modules and certifications using valid filters via MCP SSE.",
     "version": "1.0"
   },
-  "host": "mcp-learn-catalog-app.azurewebsites.net",
+  "host": "mcp-learn-catalog-app-azevddenc4cmdzdp.westeurope-01.azurewebsites.net",
   "basePath": "/",
   "schemes": ["https"],
   "definitions": {
