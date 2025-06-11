@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Microsoft Learn Catalog MCP",
-    "description": "Get Microsoft Learn modules, learning paths and certifications using MCP and SSE.",
+    "description": "Stream Microsoft Learn modules and certifications using real filters.",
     "version": "1.0"
   },
   "host": "mcp-learn-catalog-app-azevddenc4cmdzdp.westeurope-01.azurewebsites.net",
@@ -28,44 +28,25 @@
   "paths": {
     "/sseCatalog": {
       "get": {
-        "summary": "Microsoft Learn Catalog MCP",
+        "summary": "Microsoft Learn Catalog MCP (streaming)",
         "parameters": [
-          {
-            "in": "query",
-            "name": "locale",
-            "type": "string",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "search",
-            "type": "string",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "type",
-            "type": "string",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "type": "integer",
-            "required": false,
-            "description": "Límite de resultados (máximo recomendado: 10)"
-          }
+          { "in": "query", "name": "locale", "type": "string", "required": false },
+          { "in": "query", "name": "type", "type": "string", "required": false },
+          { "in": "query", "name": "level", "type": "string", "required": false },
+          { "in": "query", "name": "subject", "type": "string", "required": false },
+          { "in": "query", "name": "popularity", "type": "string", "required": false, "description": "Ej: >0.5, >=0.9" },
+          { "in": "query", "name": "last_modified", "type": "string", "required": false, "description": "Ej: gte 2022-10-01" }
         ],
         "produces": ["application/json"],
         "responses": {
           "200": {
-            "description": "Immediate Response",
+            "description": "Catálogo filtrado",
             "schema": {
               "$ref": "#/definitions/QueryResponse"
             }
           },
           "201": {
-            "description": "Created and will follow callback"
+            "description": "Respuesta recibida, se procesará por streaming"
           }
         },
         "operationId": "McpSseCatalog",
