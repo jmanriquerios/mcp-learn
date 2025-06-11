@@ -44,7 +44,13 @@
           "200": {
             "description": "Catálogo filtrado",
             "schema": {
-              "$ref": "#/definitions/QueryResponse"
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "array",
+                  "items": { "type": "object" }
+                }
+              }
             }
           }
         }
