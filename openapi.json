@@ -2,29 +2,12 @@
   "swagger": "2.0",
   "info": {
     "title": "Microsoft Learn Catalog MCP",
-    "description": "Stream Microsoft Learn modules and certifications using valid filters via MCP SSE.",
+    "description": "Stream Microsoft Learn catalog data using valid filters via MCP SSE.",
     "version": "1.0"
   },
   "host": "mcp-learn-catalog-app-azevddenc4cmdzdp.westeurope-01.azurewebsites.net",
   "basePath": "/",
   "schemes": ["https"],
-  "definitions": {
-    "QueryResponse": {
-      "type": "object",
-      "properties": {
-        "jsonrpc": { "type": "string" },
-        "id": { "type": "string" },
-        "method": { "type": "string" },
-        "params": { "type": "object" },
-        "result": {
-          "type": "array",
-          "items": { "type": "object" },
-          "maxItems": 10
-        },
-        "error": { "type": "object" }
-      }
-    }
-  },
   "paths": {
     "/sseCatalog": {
       "get": {
@@ -35,21 +18,26 @@
         "parameters": [
           { "in": "query", "name": "locale", "type": "string", "required": false },
           { "in": "query", "name": "type", "type": "string", "required": false },
-          { "in": "query", "name": "level", "type": "string", "required": false },        
+          { "in": "query", "name": "level", "type": "string", "required": false },
           { "in": "query", "name": "role", "type": "string", "required": false },
           { "in": "query", "name": "product", "type": "string", "required": false }
-      ],
+        ],
         "produces": ["application/json"],
         "responses": {
           "200": {
-            "description": "Catálogo filtrado",
+            "description": "Catálogo SSE",
             "schema": {
               "type": "object",
               "properties": {
+                "jsonrpc": { "type": "string" },
+                "id": { "type": "string" },
+                "method": { "type": "string" },
+                "params": { "type": "object" },
                 "result": {
                   "type": "array",
                   "items": { "type": "object" }
-                }
+                },
+                "error": { "type": "object" }
               }
             }
           }
@@ -57,6 +45,7 @@
       }
     }
   },
+  "definitions": {},
   "securityDefinitions": {},
   "security": []
 }
