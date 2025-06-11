@@ -126,16 +126,17 @@ const transports: Record<string, SSEServerTransport> = {};
 // Endpoint SSE para establecer conexión
 app.get("/sse", async (req: Request, res: Response) => {
   try {
-    const transport = new SSEServerTransport("/message", res);
-    transports[transport.sessionId] = transport;
+    const transport = new SSEServerTransport(res);
+    const sessionId = transport.sessionId;
+    transports[sessionId] = transport;
     
     res.on("close", () => {
-      delete transports[transport.sessionId];
-      console.log(`Conexión SSE cerrada: ${transport.sessionId}`);
+      delete transports[sessionId];
+      console.log(`Conexión SSE cerrada: ${sessionId}`);
     });
 
     await server.connect(transport);
-    console.log(`Nueva conexión SSE establecida: ${transport.sessionId}`);
+    console.log(`Nueva conexión SSE establecida: ${sessionId}`);
   } catch (error) {
     console.error("Error establishing SSE connection:", error);
     res.status(500).send("Error establishing connection");
@@ -156,7 +157,8 @@ app.post("/message", express.json(), async (req: Request, res: Response) => {
   }
 
   try {
-    await transport.handlePostMessage(req, res);
+    await transport.handleMessage(req.body);
+    res.status(200).json({ success: true });
   } catch (error) {
     console.error("Error handling POST message:", error);
     res.status(500).json({ error: "Error processing message" });
