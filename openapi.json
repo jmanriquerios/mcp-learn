@@ -1,0 +1,88 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "MCP – Microsoft Learn Catalog",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://mcp-learn-catalog-app-azevddenc4cmdzdp.westeurope-01.azurewebsites.net"
+    }
+  ],
+  "paths": {
+    "/searchCatalog": {
+      "get": {
+        "summary": "Search Microsoft Learn catalog",
+        "parameters": [
+          {"name": "locale", "in": "query", "schema": {"type": "string"}},
+          {"name": "search", "in": "query", "schema": {"type": "string"}},
+          {"name": "skip", "in": "query", "schema": {"type": "integer"}},
+          {"name": "top", "in": "query", "schema": {"type": "integer"}},
+          {"name": "type", "in": "query", "schema": {"type": "string"}}
+        ],
+        "responses": {
+          "200": {
+            "description": "Catalog data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/streamCatalog": {
+      "get": {
+        "summary": "Stream Microsoft Learn catalog",
+        "parameters": [
+          {"name": "locale", "in": "query", "schema": {"type": "string"}},
+          {"name": "search", "in": "query", "schema": {"type": "string"}},
+          {"name": "skip", "in": "query", "schema": {"type": "integer"}},
+          {"name": "top", "in": "query", "schema": {"type": "integer"}},
+          {"name": "type", "in": "query", "schema": {"type": "string"}}
+        ],
+        "x-ms-sse": true,
+        "responses": {
+          "200": {
+            "description": "Streamed catalog data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sseCatalog": {
+      "get": {
+        "summary": "SSE Microsoft Learn catalog",
+        "parameters": [
+          {"name": "locale", "in": "query", "schema": {"type": "string"}},
+          {"name": "search", "in": "query", "schema": {"type": "string"}},
+          {"name": "skip", "in": "query", "schema": {"type": "integer"}},
+          {"name": "top", "in": "query", "schema": {"type": "integer"}},
+          {"name": "type", "in": "query", "schema": {"type": "string"}}
+        ],
+        "x-ms-sse": true,
+        "responses": {
+          "200": {
+            "description": "SSE streamed catalog data",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
