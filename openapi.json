@@ -1,14 +1,13 @@
 {
-  "openapi": "3.0.1",
+  "swagger": "2.0",
   "info": {
     "title": "MCP – Microsoft Learn Catalog",
+    "description": "Get Microsoft Learn modules, learning paths and certifications via MCP.",
     "version": "1.0.1"
   },
-  "servers": [
-    {
-      "url": "https://mcp-learn-catalog-app-azevddenc4cmdzdp.westeurope-01.azurewebsites.net"
-    }
-  ],
+  "host": "mcp-learn-catalog-app-azevddenc4cmdzdp.westeurope-01.azurewebsites.net",
+  "basePath": "/",
+  "schemes": ["https"],
   "paths": {
     "/searchCatalog": {
       "get": {
@@ -19,28 +18,29 @@
             "name": "locale",
             "in": "query",
             "description": "Idioma de los resultados (ej. es-es, en-us)",
-            "schema": { "type": "string" }
+            "required": false,
+            "type": "string"
           },
           {
             "name": "search",
             "in": "query",
             "description": "Palabra clave para buscar en el catálogo",
-            "schema": { "type": "string" }
+            "required": false,
+            "type": "string"
           },
           {
             "name": "type",
             "in": "query",
             "description": "Lista de tipos separados por coma (ej. modules,learningPaths)",
-            "schema": { "type": "string" }
+            "required": false,
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "Datos del catálogo",
-            "content": {
-              "application/json": {
-                "schema": { "type": "object" }
-              }
+            "schema": {
+              "type": "object"
             }
           }
         }
@@ -52,17 +52,15 @@
         "summary": "Stream Microsoft Learn catalog",
         "x-ms-sse": true,
         "parameters": [
-          { "name": "locale", "in": "query", "schema": { "type": "string" } },
-          { "name": "search", "in": "query", "schema": { "type": "string" } },
-          { "name": "type", "in": "query", "schema": { "type": "string" } }
+          { "name": "locale", "in": "query", "type": "string" },
+          { "name": "search", "in": "query", "type": "string" },
+          { "name": "type", "in": "query", "type": "string" }
         ],
         "responses": {
           "200": {
             "description": "Streamed catalog data",
-            "content": {
-              "application/json": {
-                "schema": { "type": "object" }
-              }
+            "schema": {
+              "type": "object"
             }
           }
         }
@@ -74,17 +72,15 @@
         "summary": "SSE Microsoft Learn catalog",
         "x-ms-sse": true,
         "parameters": [
-          { "name": "locale", "in": "query", "schema": { "type": "string" } },
-          { "name": "search", "in": "query", "schema": { "type": "string" } },
-          { "name": "type", "in": "query", "schema": { "type": "string" } }
+          { "name": "locale", "in": "query", "type": "string" },
+          { "name": "search", "in": "query", "type": "string" },
+          { "name": "type", "in": "query", "type": "string" }
         ],
         "responses": {
           "200": {
             "description": "SSE streamed catalog data",
-            "content": {
-              "text/event-stream": {
-                "schema": { "type": "string" }
-              }
+            "schema": {
+              "type": "string"
             }
           }
         }
