@@ -7,8 +7,12 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 
+// ✔ Ruta principal para verificación de estado
+app.get('/', (req, res) => {
+  res.send('✅ MCP Learn Catalog is running. Try /sseCatalog?locale=es-es&type=modules');
+});
 
-// Ruta SSE MCP
+// ✔ Ruta MCP SSE
 app.get('/sseCatalog', sseCatalog);
 
 app.listen(port, () => {
