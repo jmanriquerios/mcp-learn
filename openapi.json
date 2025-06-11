@@ -2,10 +2,10 @@
   "swagger": "2.0",
   "info": {
     "title": "Microsoft Learn Catalog MCP",
-    "description": "Stream Microsoft Learn modules and certifications using real filters.",
+    "description": "Stream Microsoft Learn modules and certifications using valid filters via MCP SSE.",
     "version": "1.0"
   },
-  "host": "mcp-learn-catalog-app-azevddenc4cmdzdp.westeurope-01.azurewebsites.net",
+  "host": "mcp-learn-catalog-app.azurewebsites.net",
   "basePath": "/",
   "schemes": ["https"],
   "definitions": {
@@ -28,13 +28,18 @@
   "paths": {
     "/sseCatalog": {
       "get": {
-        "summary": "Microsoft Learn Catalog MCP (streaming)",
+        "summary": "Microsoft Learn Catalog MCP (SSE)",
+        "operationId": "McpSseCatalog",
+        "tags": ["Agentic", "McpSse"],
+        "x-ms-sse": true,
         "parameters": [
           { "in": "query", "name": "locale", "type": "string", "required": false },
           { "in": "query", "name": "type", "type": "string", "required": false },
           { "in": "query", "name": "level", "type": "string", "required": false },
-          { "in": "query", "name": "subject", "type": "string", "required": false }
-          
+          { "in": "query", "name": "subject", "type": "string", "required": false },
+          { "in": "query", "name": "popularity", "type": "string", "required": false, "description": "Ej: >0.8, >=0.5" },
+          { "in": "query", "name": "last_modified", "type": "string", "required": false, "description": "Ej: gte 2024-01-01" },
+          { "in": "query", "name": "search", "type": "string", "required": false }
         ],
         "produces": ["application/json"],
         "responses": {
@@ -43,13 +48,8 @@
             "schema": {
               "$ref": "#/definitions/QueryResponse"
             }
-          },
-          "201": {
-            "description": "Respuesta recibida, se procesará por streaming"
           }
-        },
-        "operationId": "McpSseCatalog",
-        "tags": ["Agentic", "McpSse"]
+        }
       }
     }
   },

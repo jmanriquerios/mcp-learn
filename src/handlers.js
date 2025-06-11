@@ -1,10 +1,7 @@
 import { fetchCatalog } from './catalogClient.js';
 
-// Filtrar solo los parámetros válidos según Learn Catalog API
 function sanitizeQueryParams(params) {
-  const allowed = [
-    "locale", "type", "level", "subject", "search"
-  ];
+  const allowed = ["locale", "type", "level", "subject", "popularity", "last_modified", "search"];
   const clean = {};
   for (const key of allowed) {
     if (params[key]) {
@@ -14,7 +11,6 @@ function sanitizeQueryParams(params) {
   return clean;
 }
 
-// Único handler SSE conforme al estándar MCP para Copilot Studio
 export async function sseCatalog(req, res) {
   try {
     res.setHeader('Content-Type', 'text/event-stream');

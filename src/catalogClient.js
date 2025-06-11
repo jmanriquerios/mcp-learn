@@ -10,5 +10,3 @@ export async function fetchCatalog(params, stream = false) {
   };
   return axios(config);
 }
-
-
