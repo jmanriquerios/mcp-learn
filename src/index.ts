@@ -126,7 +126,11 @@ const transports: Record<string, SSEServerTransport> = {};
 // Endpoint SSE para establecer conexión
 app.get("/sse", async (req: Request, res: Response) => {
   try {
-    const transport = new SSEServerTransport(res);
+    const host = req.get("host") || "localhost:3000";
+    const protocol = req.get("x-forwarded-proto") || "http";
+    const baseUrl = `${protocol}://${host}`;
+    
+    const transport = new SSEServerTransport(baseUrl, res);
     const sessionId = transport.sessionId;
     transports[sessionId] = transport;
     
@@ -157,7 +161,7 @@ app.post("/message", express.json(), async (req: Request, res: Response) => {
   }
 
   try {
-    await transport.handleMessage(req.body);
+    await transport.handleMessage(req.body, res);
     res.status(200).json({ success: true });
   } catch (error) {
     console.error("Error handling POST message:", error);
