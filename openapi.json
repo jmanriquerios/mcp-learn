@@ -12,22 +12,21 @@
   "paths": {
     "/searchCatalog": {
       "get": {
+        "operationId": "searchCatalog",
         "summary": "Search Microsoft Learn catalog",
         "parameters": [
-          {"name": "locale", "in": "query", "schema": {"type": "string"}},
-          {"name": "search", "in": "query", "schema": {"type": "string"}},
-          {"name": "skip", "in": "query", "schema": {"type": "integer"}},
-          {"name": "top", "in": "query", "schema": {"type": "integer"}},
-          {"name": "type", "in": "query", "schema": {"type": "string"}}
+          { "name": "locale", "in": "query", "schema": { "type": "string" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "skip", "in": "query", "schema": { "type": "integer" } },
+          { "name": "top", "in": "query", "schema": { "type": "integer" } },
+          { "name": "type", "in": "query", "schema": { "type": "string" } }
         ],
         "responses": {
           "200": {
             "description": "Catalog data",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object"
-                }
+                "schema": { "type": "object" }
               }
             }
           }
@@ -36,23 +35,22 @@
     },
     "/streamCatalog": {
       "get": {
+        "operationId": "streamCatalog",
         "summary": "Stream Microsoft Learn catalog",
-        "parameters": [
-          {"name": "locale", "in": "query", "schema": {"type": "string"}},
-          {"name": "search", "in": "query", "schema": {"type": "string"}},
-          {"name": "skip", "in": "query", "schema": {"type": "integer"}},
-          {"name": "top", "in": "query", "schema": {"type": "integer"}},
-          {"name": "type", "in": "query", "schema": {"type": "string"}}
-        ],
         "x-ms-sse": true,
+        "parameters": [
+          { "name": "locale", "in": "query", "schema": { "type": "string" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "skip", "in": "query", "schema": { "type": "integer" } },
+          { "name": "top", "in": "query", "schema": { "type": "integer" } },
+          { "name": "type", "in": "query", "schema": { "type": "string" } }
+        ],
         "responses": {
           "200": {
             "description": "Streamed catalog data",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object"
-                }
+                "schema": { "type": "object" }
               }
             }
           }
@@ -61,23 +59,22 @@
     },
     "/sseCatalog": {
       "get": {
+        "operationId": "sseCatalog",
         "summary": "SSE Microsoft Learn catalog",
-        "parameters": [
-          {"name": "locale", "in": "query", "schema": {"type": "string"}},
-          {"name": "search", "in": "query", "schema": {"type": "string"}},
-          {"name": "skip", "in": "query", "schema": {"type": "integer"}},
-          {"name": "top", "in": "query", "schema": {"type": "integer"}},
-          {"name": "type", "in": "query", "schema": {"type": "string"}}
-        ],
         "x-ms-sse": true,
+        "parameters": [
+          { "name": "locale", "in": "query", "schema": { "type": "string" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "skip", "in": "query", "schema": { "type": "integer" } },
+          { "name": "top", "in": "query", "schema": { "type": "integer" } },
+          { "name": "type", "in": "query", "schema": { "type": "string" } }
+        ],
         "responses": {
           "200": {
             "description": "SSE streamed catalog data",
             "content": {
               "text/event-stream": {
-                "schema": {
-                  "type": "string"
-                }
+                "schema": { "type": "string" }
               }
             }
           }
