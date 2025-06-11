@@ -7,10 +7,6 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 
-// Ruta principal para diagnóstico visual
-app.get('/', (req, res) => {
-  res.send('✅ MCP Learn Catalog API is running. Use /sseCatalog with query parameters.');
-});
 
 // Ruta SSE MCP
 app.get('/sseCatalog', sseCatalog);
