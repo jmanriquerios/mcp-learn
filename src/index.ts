@@ -1,16 +1,28 @@
 // src/index.ts
 import express, { Request, Response } from "express";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+  Tool,
+} from "@modelcontextprotocol/sdk/types.js";
 
-const server = new McpServer({
-  name: "learnCatalog",
-  description: "MCP server para Microsoft Learn Catalog API",
-  version: "1.0.0",
-});
+// Crear el servidor MCP
+const server = new Server(
+  {
+    name: "learnCatalog",
+    version: "1.0.0",
+  },
+  {
+    capabilities: {
+      tools: {},
+    },
+  }
+);
 
-// Definir la herramienta con parámetros completos
-server.setRequestHandler("tools/list", async () => {
+// Definir las herramientas disponibles
+server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
       {
@@ -43,18 +55,19 @@ server.setRequestHandler("tools/list", async () => {
           },
           additionalProperties: false
         }
-      }
+      } satisfies Tool
     ]
   };
 });
 
 // Handler para ejecutar herramientas
-server.setRequestHandler("tools/call", async (request) => {
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
   if (request.params.name !== "get-catalog") {
     throw new Error(`Herramienta desconocida: ${request.params.name}`);
   }
 
-  const { locale, type, level, role, product } = request.params.arguments as {
+  const args = request.params.arguments || {};
+  const { locale, type, level, role, product } = args as {
     locale?: string;
     type?: string;
     level?: string;
@@ -88,7 +101,7 @@ server.setRequestHandler("tools/call", async (request) => {
           text: `Catálogo de Microsoft Learn obtenido exitosamente. Encontrados ${data.modules?.length || 0} módulos y ${data.learningPaths?.length || 0} rutas de aprendizaje.`
         },
         {
-          type: "text",
+          type: "text", 
           text: JSON.stringify(data, null, 2)
         }
       ]
