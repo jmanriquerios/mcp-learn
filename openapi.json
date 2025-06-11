@@ -36,8 +36,10 @@
           { "in": "query", "name": "locale", "type": "string", "required": false },
           { "in": "query", "name": "type", "type": "string", "required": false },
           { "in": "query", "name": "level", "type": "string", "required": false },
-          { "in": "query", "name": "subject", "type": "string", "required": false }
-        ],
+          { "in": "query", "name": "subject", "type": "string", "required": false },
+          { "in": "query", "name": "role", "type": "string", "required": false },
+          { "in": "query", "name": "product", "type": "string", "required": false }
+      ],
         "produces": ["application/json"],
         "responses": {
           "200": {
