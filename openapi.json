@@ -1,90 +1,78 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "MCP – Microsoft Learn Catalog",
-    "description": "Get Microsoft Learn modules, learning paths and certifications via MCP.",
-    "version": "1.0.1"
+    "title": "Microsoft Learn Catalog MCP",
+    "description": "Get Microsoft Learn modules, learning paths and certifications using MCP and SSE.",
+    "version": "1.0"
   },
   "host": "mcp-learn-catalog-app-azevddenc4cmdzdp.westeurope-01.azurewebsites.net",
   "basePath": "/",
   "schemes": ["https"],
-  "paths": {
-    "/searchCatalog": {
-      "get": {
-        "operationId": "searchCatalog",
-        "summary": "Search Microsoft Learn catalog",
-        "parameters": [
-          {
-            "name": "locale",
-            "in": "query",
-            "description": "Idioma de los resultados (ej. es-es, en-us)",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "search",
-            "in": "query",
-            "description": "Palabra clave para buscar en el catálogo",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "type",
-            "in": "query",
-            "description": "Lista de tipos separados por coma (ej. modules,learningPaths)",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Datos del catálogo",
-            "schema": {
-              "type": "object"
-            }
-          }
-        }
-      }
-    },
-    "/streamCatalog": {
-      "get": {
-        "operationId": "streamCatalog",
-        "summary": "Stream Microsoft Learn catalog",
-        "x-ms-sse": true,
-        "parameters": [
-          { "name": "locale", "in": "query", "type": "string" },
-          { "name": "search", "in": "query", "type": "string" },
-          { "name": "type", "in": "query", "type": "string" }
-        ],
-        "responses": {
-          "200": {
-            "description": "Streamed catalog data",
-            "schema": {
-              "type": "object"
-            }
-          }
-        }
-      }
-    },
-    "/sseCatalog": {
-      "get": {
-        "operationId": "sseCatalog",
-        "summary": "SSE Microsoft Learn catalog",
-        "x-ms-sse": true,
-        "parameters": [
-          { "name": "locale", "in": "query", "type": "string" },
-          { "name": "search", "in": "query", "type": "string" },
-          { "name": "type", "in": "query", "type": "string" }
-        ],
-        "responses": {
-          "200": {
-            "description": "SSE streamed catalog data",
-            "schema": {
-              "type": "string"
-            }
-          }
-        }
+  "definitions": {
+    "QueryResponse": {
+      "type": "object",
+      "properties": {
+        "jsonrpc": { "type": "string" },
+        "id": { "type": "string" },
+        "method": { "type": "string" },
+        "params": { "type": "object" },
+        "result": {
+          "type": "array",
+          "items": { "type": "object" },
+          "maxItems": 10
+        },
+        "error": { "type": "object" }
       }
     }
-  }
+  },
+  "paths": {
+    "/sseCatalog": {
+      "get": {
+        "summary": "Microsoft Learn Catalog MCP",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "locale",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "type": "integer",
+            "required": false,
+            "description": "Límite de resultados (máximo recomendado: 10)"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Immediate Response",
+            "schema": {
+              "$ref": "#/definitions/QueryResponse"
+            }
+          },
+          "201": {
+            "description": "Created and will follow callback"
+          }
+        },
+        "operationId": "McpSseCatalog",
+        "tags": ["Agentic", "McpSse"]
+      }
+    }
+  },
+  "securityDefinitions": {},
+  "security": []
 }
