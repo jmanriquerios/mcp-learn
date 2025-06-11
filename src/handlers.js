@@ -1,8 +1,29 @@
 import { fetchCatalog } from './catalogClient.js';
 
+function sanitizeQueryParams(params) {
+  const clean = {};
+  if (params.locale) clean.locale = params.locale;
+  if (params.search) clean.search = params.search;
+
+  const allowedTypes = [
+    'modules', 'units', 'learningPaths',
+    'appliedSkills', 'certifications', 'mergedCertifications',
+    'exams', 'courses', 'levels', 'products',
+    'roles', 'subjects'
+  ];
+
+  if (params.type) {
+    const types = params.type.split(',').filter(t => allowedTypes.includes(t));
+    if (types.length > 0) clean.type = types.join(',');
+  }
+
+  return clean;
+}
+
 export async function searchCatalog(req, res) {
   try {
-    const resp = await fetchCatalog(req.query, false);  // JSON completo
+    const sanitizedParams = sanitizeQueryParams(req.query);
+    const resp = await fetchCatalog(sanitizedParams, false);
     if (!resp.data || typeof resp.data !== 'object') {
       throw new Error("Unexpected response format");
     }
@@ -16,7 +37,8 @@ export async function searchCatalog(req, res) {
 export async function streamCatalog(req, res) {
   try {
     res.setHeader('Content-Type', 'application/json');
-    const resp = await fetchCatalog(req.query, true);  // modo stream
+    const sanitizedParams = sanitizeQueryParams(req.query);
+    const resp = await fetchCatalog(sanitizedParams, true);
     if (!resp.data || !resp.data.pipe) {
       throw new Error("La respuesta no es un stream válido");
     }
@@ -31,8 +53,9 @@ export async function sseCatalog(req, res) {
   try {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
+    const sanitizedParams = sanitizeQueryParams(req.query);
+    const resp = await fetchCatalog(sanitizedParams, true);
 
-    const resp = await fetchCatalog(req.query, true);
     if (!resp.data || typeof resp.data[Symbol.asyncIterator] !== 'function') {
       throw new Error("No se puede iterar sobre el stream");
     }
