@@ -121,51 +121,29 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 });
 
 const app = express();
-const transports: Record<string, SSEServerTransport> = {};
 
 // Endpoint SSE para establecer conexión
 app.get("/sse", async (req: Request, res: Response) => {
   try {
     const host = req.get("host") || "localhost:3000";
-    const protocol = req.get("x-forwarded-proto") || "http";
+    const protocol = req.get("x-forwarded-proto") || (req.secure ? "https" : "http");
     const baseUrl = `${protocol}://${host}`;
     
+    console.log(`Creating SSE transport with baseUrl: ${baseUrl}`);
+    
     const transport = new SSEServerTransport(baseUrl, res);
-    const sessionId = transport.sessionId;
-    transports[sessionId] = transport;
     
     res.on("close", () => {
-      delete transports[sessionId];
-      console.log(`Conexión SSE cerrada: ${sessionId}`);
+      console.log(`Conexión SSE cerrada`);
     });
 
     await server.connect(transport);
-    console.log(`Nueva conexión SSE establecida: ${sessionId}`);
+    console.log(`Nueva conexión SSE establecida`);
   } catch (error) {
     console.error("Error establishing SSE connection:", error);
-    res.status(500).send("Error establishing connection");
-  }
-});
-
-// Endpoint para manejar mensajes POST
-app.post("/message", express.json(), async (req: Request, res: Response) => {
-  const sessionId = req.query.sessionId as string;
-  
-  if (!sessionId) {
-    return res.status(400).json({ error: "sessionId is required" });
-  }
-  
-  const transport = transports[sessionId];
-  if (!transport) {
-    return res.status(400).json({ error: "No transport found for sessionId" });
-  }
-
-  try {
-    await transport.handleMessage(req.body, res);
-    res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("Error handling POST message:", error);
-    res.status(500).json({ error: "Error processing message" });
+    if (!res.headersSent) {
+      res.status(500).send("Error establishing connection");
+    }
   }
 });
 
@@ -174,8 +152,7 @@ app.get("/", (_req, res) => {
   res.json({
     name: "MCP Learn Catalog Server",
     status: "running",
-    version: "1.0.0",
-    activeConnections: Object.keys(transports).length
+    version: "1.0.0"
   });
 });
 
@@ -184,8 +161,7 @@ app.get("/health", (_req, res) => {
   res.json({
     status: "healthy",
     uptime: process.uptime(),
-    memory: process.memoryUsage(),
-    activeTransports: Object.keys(transports).length
+    memory: process.memoryUsage()
   });
 });
 
@@ -194,5 +170,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ MCP Learn Catalog Server listening on http://localhost:${PORT}`);
   console.log(`📡 SSE endpoint: http://localhost:${PORT}/sse`);
-  console.log(`📬 Message endpoint: http://localhost:${PORT}/message`);
 });
