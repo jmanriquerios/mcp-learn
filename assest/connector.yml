@@ -1,0 +1,49 @@
+swagger: "2.0"
+info:
+  title: Learn Catalog MCP Server
+  description: Obtiene elementos del catálogo de Microsoft Learn a través de MCP Server.
+  version: "1.0"
+host: mcp-learn-catalog-app-azevddenc4cmdzdp.westeurope-01.azurewebsites.net
+basePath: /
+schemes:
+  - https
+definitions:
+  QueryResponse:
+    type: object
+    properties:
+      jsonrpc:
+        type: string
+      id:
+        type: string
+      method:
+        type: string
+      params:
+        type: object
+      result:
+        type: object
+      error:
+        type: object
+paths:
+  /sse:
+    get:
+      summary: Learn Catalog MCP Server SSE endpoint
+      parameters:
+        - in: query
+          name: sessionId
+          type: string
+          required: false
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Immediate Response
+          schema:
+            $ref: "#/definitions/QueryResponse"
+        "201":
+          description: Created and will follow callback
+      operationId: LearnCatalogMCP
+      tags:
+        - Agentic
+        - McpSse
+securityDefinitions: {}
+security: []
