@@ -36,10 +36,7 @@
           { "in": "query", "name": "locale", "type": "string", "required": false },
           { "in": "query", "name": "type", "type": "string", "required": false },
           { "in": "query", "name": "level", "type": "string", "required": false },
-          { "in": "query", "name": "subject", "type": "string", "required": false },
-          { "in": "query", "name": "popularity", "type": "string", "required": false, "description": "Ej: >0.8, >=0.5" },
-          { "in": "query", "name": "last_modified", "type": "string", "required": false, "description": "Ej: gte 2024-01-01" },
-          { "in": "query", "name": "search", "type": "string", "required": false }
+          { "in": "query", "name": "subject", "type": "string", "required": false }
         ],
         "produces": ["application/json"],
         "responses": {

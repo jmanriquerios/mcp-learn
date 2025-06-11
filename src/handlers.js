@@ -1,7 +1,8 @@
 import { fetchCatalog } from './catalogClient.js';
 
+// Solo se permitirán estos parámetros
 function sanitizeQueryParams(params) {
-  const allowed = ["locale", "type", "level", "subject", "popularity", "last_modified", "search"];
+  const allowed = ["locale", "type", "level", "subject"];
   const clean = {};
   for (const key of allowed) {
     if (params[key]) {
@@ -11,10 +12,12 @@ function sanitizeQueryParams(params) {
   return clean;
 }
 
+// Handler único para SSE en MCP
 export async function sseCatalog(req, res) {
   try {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
+
     const filteredParams = sanitizeQueryParams(req.query);
     const resp = await fetchCatalog(filteredParams, true);
 
@@ -32,3 +35,4 @@ export async function sseCatalog(req, res) {
     });
   }
 }
+
