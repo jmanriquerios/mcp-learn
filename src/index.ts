@@ -2,7 +2,6 @@ import express, { Request, Response } from "express";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import axios from 'axios';
-import type { RequestHandlerExtra, ServerRequest, ServerNotification } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 interface LearnPath {
   uid: string;
@@ -20,7 +19,7 @@ const server = new McpServer({
 // Get learning paths tool
 server.tool(
   "get-learning-paths",
-  async (_params: RequestHandlerExtra<ServerRequest, ServerNotification>) => {
+  async () => {
     try {
       const response = await axios.get<LearnPath[]>("https://learn.microsoft.com/api/catalog/", {
         params: { 
@@ -58,6 +57,7 @@ server.tool(
 );
 
 const app = express();
+app.use(express.json());
 
 // Transport storage for multiple connections
 const transports: { [sessionId: string]: SSEServerTransport } = {};
