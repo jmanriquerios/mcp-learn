@@ -3,63 +3,28 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import axios from 'axios';
 
+interface LearnPath {
+  uid: string;
+  title: string;
+  summary: string;
+  url: string;
+}
+
 const server = new McpServer({
   name: "learn-catalog",
   description: "Microsoft Learn Catalog API Server",
-  version: "1.0.0",
-  tools: [
-    {
-      name: "search-modules",
-      description: "Search Microsoft Learn modules",
-      parameters: {
-        query: { type: 'string', description: 'Search query' },
-        locale: { type: 'string', description: 'Content locale', default: 'en-us' },
-        level: { type: 'string', description: 'Difficulty level', enum: ['beginner', 'intermediate', 'advanced'] }
-      }
-    },
-    {
-      name: "get-learning-paths",
-      description: "Get Microsoft Learning Paths",
-      parameters: {
-        locale: { type: 'string', description: 'Content locale', default: 'en-us' },
-        role: { type: 'string', description: 'Target role' }
-      }
-    }
-  ]
+  version: "1.0.0"
 });
 
-// Search modules tool
-const searchModules = server.tool(
-  "search-modules",
-  "Search Microsoft Learn modules",
-  async (params) => {
-    const response = await axios.get("https://learn.microsoft.com/api/catalog/", {
-      params: { ...params, type: 'modules' },
-      headers: { 'Accept': 'application/json' }
-    });
-    
-    return {
-      content: [{
-        type: "text",
-        text: `Found ${response.data.length} modules`,
-        data: response.data
-      }]
-    };
-  }
-);
-
 // Get learning paths tool
-const getLearningPaths = server.tool(
+server.tool(
   "get-learning-paths",
-  "Get Microsoft Learning Paths",
-  async (params) => {
+  async (_params) => {
     try {
-      console.log('Fetching learning paths with params:', params);
-      
-      const response = await axios.get("https://learn.microsoft.com/api/catalog/", {
+      const response = await axios.get<LearnPath[]>("https://learn.microsoft.com/api/catalog/", {
         params: { 
           type: 'learningPaths',
-          locale: params.locale || 'es-es'
+          locale: 'es-es'
         },
         headers: { 
           'Accept': 'application/json',
@@ -67,22 +32,11 @@ const getLearningPaths = server.tool(
         }
       });
       
-      console.log('API Response:', response.data);
-      
-      if (!response.data || response.data.length === 0) {
-        return {
-          content: [{
-            type: "text",
-            text: "No learning paths found"
-          }]
-        };
-      }
-
       return {
         content: [{
           type: "text",
           text: `Found ${response.data.length} learning paths`,
-          data: response.data.map(path => ({
+          data: response.data.map((path: LearnPath) => ({
             uid: path.uid,
             title: path.title,
             summary: path.summary,
