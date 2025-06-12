@@ -11,14 +11,15 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.9.0",
-    "express": "^5.1.0",
     "axios": "^1.9.0",
+    "express": "^5.1.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.1",
     "@types/node": "^18.0.0",
-    "typescript": "^5.3.3",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }

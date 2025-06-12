@@ -1,8 +1,11 @@
 import express, { Request, Response } from "express";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import cors from 'cors';
 import axios from 'axios';
 
+
+// Define the LearnPath interface based on expected API response structure
 interface LearnPath {
   uid: string;
   title: string;
@@ -63,21 +66,56 @@ server.tool(
 );
 
 const app = express();
+app.use(cors());
 app.use(express.json());
+
+// Configure SSE headers middleware
+app.use((req, res, next) => {
+  if (req.path === '/sse') {
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+  }
+  next();
+});
 
 // Transport storage for multiple connections
 const transports: { [sessionId: string]: SSEServerTransport } = {};
 
 app.get("/sse", async (req: Request, res: Response) => {
-  const host = req.get("host");
-  const fullUri = `${req.protocol}://${host}/mcp`;
-  const transport = new SSEServerTransport(fullUri, res);
+  try {
+    // Set SSE-specific headers
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    });
 
-  transports[transport.sessionId] = transport;
-  res.on("close", () => {
-    delete transports[transport.sessionId];
-  });
-  await server.connect(transport);
+    const host = req.get("host") || 'localhost';
+    const protocol = req.protocol;
+    const fullUri = `${protocol}://${host}/mcp`;
+    
+    console.log('Creating SSE transport with URI:', fullUri);
+    
+    const transport = new SSEServerTransport(fullUri, res);
+    console.log('Session ID created:', transport.sessionId);
+    
+    transports[transport.sessionId] = transport;
+    
+    // Send initial connection message
+    res.write(`data: ${JSON.stringify({ sessionId: transport.sessionId })}\n\n`);
+    
+    res.on("close", () => {
+      console.log('Connection closed for session:', transport.sessionId);
+      delete transports[transport.sessionId];
+    });
+
+    await server.connect(transport);
+  } catch (error) {
+    console.error('SSE Error:', error);
+    res.status(500).send('SSE connection failed');
+  }
 });
 
 app.post("/mcp", async (req: Request, res: Response) => {
