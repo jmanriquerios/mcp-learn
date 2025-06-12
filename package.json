@@ -1,21 +1,23 @@
 {
   "name": "mcp-learn-catalog",
   "version": "1.0.0",
-  "description": "MCP server para Microsoft Learn Catalog API",
+  "description": "Microsoft Learn Catalog MCP with SSE",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node-esm src/index.ts"
+    "dev": "node --loader ts-node/esm src/index.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.9.0",
     "express": "^5.1.0",
+    "axios": "^1.9.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.1",
+    "@types/node": "^18.0.0",
     "typescript": "^5.3.3",
     "ts-node": "^10.9.2"
   }

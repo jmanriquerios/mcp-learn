@@ -1,10 +1,8 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
   title: Learn Catalog MCP Server
-  description: >-
-    Obtiene elementos del catálogo de Microsoft Learn a través de MCP Server.
-    Permite buscar y acceder a recursos educativos de Microsoft Learn.
-  version: '1.0'
+  description: Microsoft Learn Catalog using MCP server. Search modules, learning paths and certifications.
+  version: "1.0"
 host: mcp-learn-catalog-app-azevddenc4cmdzdp.westeurope-01.azurewebsites.net
 basePath: /
 schemes:
@@ -23,8 +21,39 @@ definitions:
         type: object
       result:
         type: object
+        properties:
+          content:
+            type: array
+            items:
+              type: object
+              properties:
+                type:
+                  type: string
+                text:
+                  type: string
+                modules:
+                  type: array
+                  items:
+                    $ref: "#/definitions/Module"
       error:
         type: object
+  Module:
+    type: object
+    properties:
+      uid:
+        type: string
+      title:
+        type: string
+      summary:
+        type: string
+      duration_in_minutes:
+        type: integer
+      levels:
+        type: array
+        items:
+          type: string
+      url:
+        type: string
 paths:
   /sse:
     get:
@@ -37,11 +66,11 @@ paths:
       produces:
         - application/json
       responses:
-        '200':
+        "200":
           description: Immediate Response
           schema:
-            $ref: '#/definitions/QueryResponse'
-        '201':
+            $ref: "#/definitions/QueryResponse"
+        "201":
           description: Created and will follow callback
       operationId: LearnCatalogMCP
       tags:
