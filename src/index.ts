@@ -4,7 +4,7 @@ import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import axios from 'axios';
 
 const server = new McpServer({
-  name: "learn-catalog-mcp",
+  name: "learn-catalog",
   description: "Microsoft Learn Catalog API Server",
   version: "1.0.0",
   tools: [
@@ -14,25 +14,18 @@ const server = new McpServer({
       parameters: {
         query: { type: 'string', description: 'Search query' },
         locale: { type: 'string', description: 'Content locale', default: 'en-us' },
-        level: { type: 'string', description: 'Difficulty level', enum: ['beginner', 'intermediate', 'advanced'] },
-      },
+        level: { type: 'string', description: 'Difficulty level', enum: ['beginner', 'intermediate', 'advanced'] }
+      }
     },
     {
       name: "get-learning-paths",
       description: "Get Microsoft Learning Paths",
       parameters: {
         locale: { type: 'string', description: 'Content locale', default: 'en-us' },
-        role: { type: 'string', description: 'Target role' },
-      },
-    },
-    {
-      name: "get-certifications",
-      description: "Get Microsoft Certifications",
-      parameters: {
-        locale: { type: 'string', description: 'Content locale', default: 'en-us' },
-      },
-    },
-  ],
+        role: { type: 'string', description: 'Target role' }
+      }
+    }
+  ]
 });
 
 // Search modules tool
@@ -44,12 +37,13 @@ const searchModules = server.tool(
       params: { ...params, type: 'modules' },
       headers: { 'Accept': 'application/json' }
     });
+    
     return {
       content: [{
         type: "text",
         text: `Found ${response.data.length} modules`,
-        modules: response.data
-      }],
+        data: response.data
+      }]
     };
   }
 );
@@ -63,31 +57,13 @@ const getLearningPaths = server.tool(
       params: { ...params, type: 'learningPaths' },
       headers: { 'Accept': 'application/json' }
     });
+    
     return {
       content: [{
         type: "text",
         text: `Found ${response.data.length} learning paths`,
-        paths: response.data
-      }],
-    };
-  }
-);
-
-// Get certifications tool
-const getCertifications = server.tool(
-  "get-certifications",
-  "Get Microsoft Certifications",
-  async (params) => {
-    const response = await axios.get("https://learn.microsoft.com/api/catalog/", {
-      params: { ...params, type: 'certifications' },
-      headers: { 'Accept': 'application/json' }
-    });
-    return {
-      content: [{
-        type: "text",
-        text: `Found ${response.data.length} certifications`,
-        certifications: response.data
-      }],
+        data: response.data
+      }]
     };
   }
 );
