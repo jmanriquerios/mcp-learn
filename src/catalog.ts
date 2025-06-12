@@ -1,6 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import axios from 'axios';
-import { z } from 'zod';
 
 const BASE_URL = 'https://learn.microsoft.com/api/catalog';
 
@@ -18,7 +17,7 @@ interface LearnModule {
 export default function registerCatalog(server: McpServer) {
   // Search modules tool
   server.tool(
-    'search_modules',
+    'search-modules',
     'Search Microsoft Learn modules',
     {
       parameters: {
@@ -29,56 +28,58 @@ export default function registerCatalog(server: McpServer) {
           description: 'Difficulty level',
           enum: ['beginner', 'intermediate', 'advanced'],
           optional: true 
-        },
-        role: { type: 'string', description: 'Target role', optional: true },
-        product: { type: 'string', description: 'Related product', optional: true }
+        }
       }
     },
     async (params) => {
-      const response = await axios.get(BASE_URL, {
-        params: {
-          type: 'modules',
-          ...params
-        },
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-
-      if (response.data.error) {
+      try {
+        const response = await axios.get(BASE_URL, {
+          params: { ...params, type: 'modules' },
+          headers: { 'Accept': 'application/json' }
+        });
+        
+        return {
+          type: 'text',
+          text: `Found ${response.data.length} modules`,
+          data: response.data
+        };
+      } catch (error) {
         return {
           type: 'error',
-          message: response.data.error
+          text: 'Error fetching modules'
         };
       }
-
-      return {
-        type: 'text',
-        text: `Found ${response.data.modules?.length || 0} modules matching your criteria.`,
-        modules: response.data.modules?.map((m: LearnModule) => ({
-          title: m.title,
-          summary: m.summary,
-          duration: m.duration_in_minutes,
-          url: m.url
-        }))
-      };
     }
   );
 
-  // Get module details tool
+  // Get learning paths tool
   server.tool(
-    'get_module',
-    'Get details for a specific module',
-    z.object({
-      uid: z.string().describe('Module unique identifier')
-    }),
+    'get-learning-paths',
+    'Get Microsoft Learning Paths',
+    {
+      parameters: {
+        locale: { type: 'string', description: 'Content locale', default: 'en-us' },
+        role: { type: 'string', description: 'Target role', optional: true }
+      }
+    },
     async (params) => {
-      const response = await axios.get(`${BASE_URL}/modules/${params.uid}`);
-      return {
-        type: 'text',
-        text: `Module details for ${response.data.title}`,
-        module: response.data
-      };
+      try {
+        const response = await axios.get(BASE_URL, {
+          params: { ...params, type: 'learningPaths' },
+          headers: { 'Accept': 'application/json' }
+        });
+        
+        return {
+          type: 'text',
+          text: `Found ${response.data.length} learning paths`,
+          data: response.data
+        };
+      } catch (error) {
+        return {
+          type: 'error',
+          text: 'Error fetching learning paths'
+        };
+      }
     }
   );
 }
