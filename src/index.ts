@@ -19,10 +19,11 @@ const server = new McpServer({
 // Get learning paths tool
 server.tool(
   "get-learning-paths",
-  async (params: any) => {
+  async (extra: any) => {
     try {
+      const params = extra?.params || {};
       console.log('Fetching learning paths with params:', params);
-      
+
       const response = await axios.get("https://learn.microsoft.com/api/catalog", {
         params: {
           type: 'modules',
@@ -37,30 +38,25 @@ server.tool(
       console.log('API Response:', response.data);
 
       return {
-        jsonrpc: "2.0",
-        id: params.id,
-        result: {
-          content: [{
-            type: "text",
-            text: `Found ${response.data.length} learning paths`,
-            data: response.data.map((path: LearnPath) => ({
-              uid: path.uid,
-              title: path.title,
-              summary: path.summary,
-              url: path.url
-            }))
-          }]
-        }
+        content: [{
+          type: "text",
+          text: `Found ${response.data.length} learning paths`,
+          data: response.data.map((path: LearnPath) => ({
+            uid: path.uid,
+            title: path.title,
+            summary: path.summary,
+            url: path.url
+          }))
+        }]
       };
     } catch (error) {
       console.error('Error fetching learning paths:', error);
       return {
-        jsonrpc: "2.0",
-        id: params.id,
-        error: {
-          code: -32000,
-          message: "Error fetching learning paths"
-        }
+        content: [{
+          type: "text",
+          text: "Error fetching learning paths"
+        }],
+        isError: true
       };
     }
   }
