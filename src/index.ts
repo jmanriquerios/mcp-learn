@@ -157,8 +157,29 @@ app.get("/", (_req, res) => {
   res.send("✅ Microsoft Learn Catalog MCP server is running!");
 });
 
+// Error handling middleware
+app.use((err: Error, req: Request, res: Response, next: Function) => {
+  console.error('Server Error:', err);
+  res.status(500).send('Internal Server Error');
+});
+
+// Basic health check
+app.get('/health', (req: Request, res: Response) => {
+  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
 const PORT = process.env.PORT || 3000;
 
+// Proper error handling for server startup
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running at http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
+}).on('error', (err) => {
+  console.error('Server startup error:', err);
+  process.exit(1);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
 });
