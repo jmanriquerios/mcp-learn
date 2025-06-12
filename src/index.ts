@@ -4,7 +4,6 @@ import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import cors from 'cors';
 import axios from 'axios';
 
-
 // Define the LearnPath interface based on expected API response structure
 interface LearnPath {
   uid: string;
@@ -13,10 +12,26 @@ interface LearnPath {
   url: string;
 }
 
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// Store active SSE connections
+const transports: { [sessionId: string]: SSEServerTransport } = {};
+
 const server = new McpServer({
   name: "learn-catalog",
   description: "Microsoft Learn Catalog API Server",
   version: "1.0.0"
+});
+
+// Debug middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`, {
+    headers: req.headers,
+    query: req.query
+  });
+  next();
 });
 
 // Get learning paths tool
@@ -65,56 +80,57 @@ server.tool(
   }
 );
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-// Configure SSE headers middleware
-app.use((req, res, next) => {
-  if (req.path === '/sse') {
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Connection', 'keep-alive');
-    res.flushHeaders();
-  }
-  next();
-});
-
-// Transport storage for multiple connections
-const transports: { [sessionId: string]: SSEServerTransport } = {};
-
+// SSE endpoint with proper headers and error handling
 app.get("/sse", async (req: Request, res: Response) => {
   try {
-    // Set SSE-specific headers
+    // Set mandatory SSE headers
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no'
     });
 
+    // Initialize transport
     const host = req.get("host") || 'localhost';
-    const protocol = req.protocol;
-    const fullUri = `${protocol}://${host}/mcp`;
-    
-    console.log('Creating SSE transport with URI:', fullUri);
-    
+    const fullUri = `https://${host}/mcp`;
     const transport = new SSEServerTransport(fullUri, res);
-    console.log('Session ID created:', transport.sessionId);
     
+    console.log(`SSE Connection established - SessionID: ${transport.sessionId}`);
+    
+    // Store transport
     transports[transport.sessionId] = transport;
-    
+
     // Send initial connection message
-    res.write(`data: ${JSON.stringify({ sessionId: transport.sessionId })}\n\n`);
-    
-    res.on("close", () => {
-      console.log('Connection closed for session:', transport.sessionId);
+    res.write(`data: ${JSON.stringify({
+      type: 'connection',
+      sessionId: transport.sessionId,
+      timestamp: new Date().toISOString()
+    })}\n\n`);
+
+    // Heartbeat to keep connection alive
+    const heartbeat = setInterval(() => {
+      if (!res.writableEnded) {
+        res.write(`data: ${JSON.stringify({
+          type: 'heartbeat',
+          timestamp: new Date().toISOString()
+        })}\n\n`);
+      }
+    }, 15000);
+
+    // Cleanup on connection close
+    req.on('close', () => {
+      clearInterval(heartbeat);
       delete transports[transport.sessionId];
+      console.log(`SSE Connection closed - SessionID: ${transport.sessionId}`);
     });
 
     await server.connect(transport);
   } catch (error) {
     console.error('SSE Error:', error);
-    res.status(500).send('SSE connection failed');
+    if (!res.writableEnded) {
+      res.status(500).end();
+    }
   }
 });
 
