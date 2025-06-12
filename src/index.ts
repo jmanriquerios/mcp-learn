@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import axios from 'axios';
+import type { RequestHandlerExtra, ServerRequest, ServerNotification } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 interface LearnPath {
   uid: string;
@@ -19,7 +20,7 @@ const server = new McpServer({
 // Get learning paths tool
 server.tool(
   "get-learning-paths",
-  async (_params) => {
+  async (_params: RequestHandlerExtra<ServerRequest, ServerNotification>) => {
     try {
       const response = await axios.get<LearnPath[]>("https://learn.microsoft.com/api/catalog/", {
         params: { 
@@ -27,16 +28,16 @@ server.tool(
           locale: 'es-es'
         },
         headers: { 
-          'Accept': 'application/json',
-          'User-Agent': 'MCP-Learn-Catalog/1.0'
+          'Accept': 'application/json'
         }
       });
-      
+
       return {
+        type: "success",
         content: [{
           type: "text",
           text: `Found ${response.data.length} learning paths`,
-          data: response.data.map((path: LearnPath) => ({
+          items: response.data.map((path: LearnPath) => ({
             uid: path.uid,
             title: path.title,
             summary: path.summary,
@@ -45,10 +46,10 @@ server.tool(
         }]
       };
     } catch (error) {
-      console.error('Learning paths error:', error);
       return {
+        type: "error",
         content: [{
-          type: "error",
+          type: "text",
           text: "Error fetching learning paths"
         }]
       };
