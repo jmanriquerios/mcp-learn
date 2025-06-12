@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   title: Learn Catalog MCP Server
-  description: Microsoft Learn Catalog using MCP server. Search modules, learning paths and certifications.
+  description: Microsoft Learn Catalog using MCP server. Search modules and learning paths.
   version: "1.0"
 host: mcp-learn-catalog-app-azevddenc4cmdzdp.westeurope-01.azurewebsites.net
 basePath: /
@@ -31,29 +31,21 @@ definitions:
                   type: string
                 text:
                   type: string
-                modules:
+                data:
                   type: array
                   items:
-                    $ref: "#/definitions/Module"
+                    type: object
+                    properties:
+                      uid:
+                        type: string
+                      title:
+                        type: string
+                      summary:
+                        type: string
+                      url:
+                        type: string
       error:
         type: object
-  Module:
-    type: object
-    properties:
-      uid:
-        type: string
-      title:
-        type: string
-      summary:
-        type: string
-      duration_in_minutes:
-        type: integer
-      levels:
-        type: array
-        items:
-          type: string
-      url:
-        type: string
 paths:
   /sse:
     get:

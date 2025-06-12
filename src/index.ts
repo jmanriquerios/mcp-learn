@@ -53,18 +53,52 @@ const getLearningPaths = server.tool(
   "get-learning-paths",
   "Get Microsoft Learning Paths",
   async (params) => {
-    const response = await axios.get("https://learn.microsoft.com/api/catalog/", {
-      params: { ...params, type: 'learningPaths' },
-      headers: { 'Accept': 'application/json' }
-    });
-    
-    return {
-      content: [{
-        type: "text",
-        text: `Found ${response.data.length} learning paths`,
-        data: response.data
-      }]
-    };
+    try {
+      console.log('Fetching learning paths with params:', params);
+      
+      const response = await axios.get("https://learn.microsoft.com/api/catalog/", {
+        params: { 
+          type: 'learningPaths',
+          locale: params.locale || 'es-es'
+        },
+        headers: { 
+          'Accept': 'application/json',
+          'User-Agent': 'MCP-Learn-Catalog/1.0'
+        }
+      });
+      
+      console.log('API Response:', response.data);
+      
+      if (!response.data || response.data.length === 0) {
+        return {
+          content: [{
+            type: "text",
+            text: "No learning paths found"
+          }]
+        };
+      }
+
+      return {
+        content: [{
+          type: "text",
+          text: `Found ${response.data.length} learning paths`,
+          data: response.data.map(path => ({
+            uid: path.uid,
+            title: path.title,
+            summary: path.summary,
+            url: path.url
+          }))
+        }]
+      };
+    } catch (error) {
+      console.error('Learning paths error:', error);
+      return {
+        content: [{
+          type: "error",
+          text: "Error fetching learning paths"
+        }]
+      };
+    }
   }
 );
 
@@ -87,11 +121,37 @@ app.get("/sse", async (req: Request, res: Response) => {
 
 app.post("/mcp", async (req: Request, res: Response) => {
   const sessionId = req.query.sessionId as string;
+  console.log('MCP Request:', {
+    sessionId,
+    body: req.body,
+    method: req.body?.method,
+    params: req.body?.params
+  });
+
   const transport = transports[sessionId];
   if (transport) {
-    await transport.handlePostMessage(req, res);
+    try {
+      await transport.handlePostMessage(req, res);
+    } catch (error) {
+      console.error('MCP Error:', error);
+      res.status(500).json({
+        jsonrpc: "2.0",
+        id: req.body?.id,
+        error: {
+          code: -32000,
+          message: "Internal error"
+        }
+      });
+    }
   } else {
-    res.status(400).send("No transport found for sessionId");
+    res.status(400).json({
+      jsonrpc: "2.0",
+      id: req.body?.id,
+      error: {
+        code: -32001,
+        message: "No transport found for sessionId"
+      }
+    });
   }
 });
 
