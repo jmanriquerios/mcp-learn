@@ -19,38 +19,48 @@ const server = new McpServer({
 // Get learning paths tool
 server.tool(
   "get-learning-paths",
-  async () => {
+  async (params: any) => {
     try {
-      const response = await axios.get<LearnPath[]>("https://learn.microsoft.com/api/catalog/", {
-        params: { 
-          type: 'learningPaths',
-          locale: 'es-es'
+      console.log('Fetching learning paths with params:', params);
+      
+      const response = await axios.get("https://learn.microsoft.com/api/catalog", {
+        params: {
+          type: 'modules',
+          locale: params.locale || 'es-es',
+          role: params.role || 'developer'
         },
-        headers: { 
+        headers: {
           'Accept': 'application/json'
         }
       });
 
+      console.log('API Response:', response.data);
+
       return {
-        type: "success",
-        content: [{
-          type: "text",
-          text: `Found ${response.data.length} learning paths`,
-          items: response.data.map((path: LearnPath) => ({
-            uid: path.uid,
-            title: path.title,
-            summary: path.summary,
-            url: path.url
-          }))
-        }]
+        jsonrpc: "2.0",
+        id: params.id,
+        result: {
+          content: [{
+            type: "text",
+            text: `Found ${response.data.length} learning paths`,
+            data: response.data.map((path: LearnPath) => ({
+              uid: path.uid,
+              title: path.title,
+              summary: path.summary,
+              url: path.url
+            }))
+          }]
+        }
       };
     } catch (error) {
+      console.error('Error fetching learning paths:', error);
       return {
-        type: "error",
-        content: [{
-          type: "text",
-          text: "Error fetching learning paths"
-        }]
+        jsonrpc: "2.0",
+        id: params.id,
+        error: {
+          code: -32000,
+          message: "Error fetching learning paths"
+        }
       };
     }
   }
@@ -78,9 +88,7 @@ app.post("/mcp", async (req: Request, res: Response) => {
   const sessionId = req.query.sessionId as string;
   console.log('MCP Request:', {
     sessionId,
-    body: req.body,
-    method: req.body?.method,
-    params: req.body?.params
+    body: req.body
   });
 
   const transport = transports[sessionId];
@@ -94,11 +102,12 @@ app.post("/mcp", async (req: Request, res: Response) => {
         id: req.body?.id,
         error: {
           code: -32000,
-          message: "Internal error"
+          message: "Internal server error"
         }
       });
     }
   } else {
+    console.warn('No transport found for sessionId:', sessionId);
     res.status(400).json({
       jsonrpc: "2.0",
       id: req.body?.id,
